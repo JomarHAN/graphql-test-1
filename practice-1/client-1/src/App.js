@@ -1,24 +1,31 @@
-import logo from './logo.svg';
 import './App.css';
+import { ApolloClient, ApolloProvider, from, InMemoryCache, HttpLink } from '@apollo/client'
+import { onError } from '@apollo/client/link/error'
+import Form from './Components/Form';
+
+const errorLink = onError(({ graphqlErrors, networkError }) => {
+  if (graphqlErrors) {
+    graphqlErrors.map(({ message, location, path }) => {
+      alert(`GrapgQL Error ${message}`)
+    })
+  }
+})
+
+const link = from([
+  errorLink,
+  new HttpLink({ uri: 'http://localhost:3030/graphql' })
+])
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  link: link
+})
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApolloProvider client={client} >
+      <Form />
+    </ApolloProvider>
   );
 }
 
